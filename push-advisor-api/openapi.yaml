@@ -1,0 +1,240 @@
+openapi: 3.1.0
+info:
+  title: Push Decision API
+  description: A simple API to help decide when it's appropriate to push code
+  version: 1.0.0
+servers:
+- url: https://canpushtoprod.abdulbaaridavids04.workers.dev
+  description: Production server
+tags:
+- name: decision
+  description: Push decision endpoints
+- name: meta
+  description: API metadata and documentation
+paths:
+  "/can-i-push-to-prod":
+    get:
+      summary: Check if it's safe to push to production
+      description: Returns yes for Monday-Thursday, no for Friday-Sunday
+      operationId: check_push_safety
+      tags:
+      - decision
+      x-gram:
+        name: can_i_push_to_prod
+        summary: "Determine if it's safe to push code to production"
+        description: |
+          <context>
+            This endpoint helps developers make informed decisions about when to push code to production by checking the current day of the week. It follows the common practice of avoiding Friday deployments.
+          </context>
+          <prerequisites>
+            - No prerequisites required for this endpoint
+          </prerequisites>
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PushDecisionResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  "/vibe-check":
+    get:
+      summary: Random vibe check for pushing to GitHub
+      description: Returns a random yes/no answer for whether it's appropriate to
+        push right now
+      operationId: vibe_check
+      tags:
+      - decision
+      x-gram:
+        name: vibe_check
+        summary: "Get a random vibe check for pushing code"
+        description: |
+          <context>
+            This endpoint provides a fun, randomized response about whether it's a good time to push code. It's designed for entertainment and can help break decision paralysis when you're unsure about pushing changes.
+          </context>
+          <prerequisites>
+            - No prerequisites required for this endpoint
+          </prerequisites>
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VibeCheckResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  "/index":
+    get:
+      summary: API index
+      description: Returns information about all available endpoints
+      operationId: get_api_index
+      tags:
+      - meta
+      x-gram:
+        name: get_api_index
+        summary: "Get API documentation and available endpoints"
+        description: |
+          <context>
+            This endpoint provides an overview of all available API endpoints and their purposes. Use this to discover what functionality is available in the Push Decision API.
+          </context>
+          <prerequisites>
+            - No prerequisites required for this endpoint
+          </prerequisites>
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IndexResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  "/openapi.json":
+    get:
+      summary: OpenAPI specification
+      description: Returns the OpenAPI specification for this API
+      operationId: get_openapi_spec
+      tags:
+      - meta
+      x-gram:
+        name: get_openapi_spec
+        summary: "Retrieve the OpenAPI specification"
+        description: |
+          <context>
+            This endpoint returns the complete OpenAPI specification for the Push Decision API in JSON format. This is useful for programmatic access to the API schema and for generating client SDKs.
+          </context>
+          <prerequisites>
+            - No prerequisites required for this endpoint
+          </prerequisites>
+      responses:
+        '200':
+          description: OpenAPI specification
+          content:
+            application/json:
+              schema:
+                type: object
+                description: The complete OpenAPI 3.1.0 specification document
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    PushDecisionResponse:
+      type: object
+      required:
+      - answer
+      - reason
+      - day
+      properties:
+        answer:
+          type: string
+          enum:
+          - 'yes'
+          - 'no'
+          description: Whether it's safe to push to production
+          examples:
+          - 'yes'
+        reason:
+          type: string
+          description: Explanation for the decision
+          examples:
+          - "It's Tuesday, safe to deploy!"
+        day:
+          type: string
+          description: Current day of the week
+          examples:
+          - "Tuesday"
+      example:
+        answer: 'yes'
+        reason: "It's Tuesday, safe to deploy!"
+        day: "Tuesday"
+    VibeCheckResponse:
+      type: object
+      required:
+      - answer
+      - vibe
+      properties:
+        answer:
+          type: string
+          enum:
+          - 'yes'
+          - 'no'
+          description: Random yes/no answer for pushing
+          examples:
+          - 'yes'
+        vibe:
+          type: string
+          description: Random vibe description
+          examples:
+          - "The stars are aligned for shipping!"
+      example:
+        answer: 'yes'
+        vibe: "The stars are aligned for shipping!"
+    IndexResponse:
+      type: object
+      required:
+      - message
+      - endpoints
+      properties:
+        message:
+          type: string
+          description: Welcome message
+          examples:
+          - "Welcome to the Push Decision API"
+        endpoints:
+          type: object
+          description: Available API endpoints and their descriptions
+          additionalProperties:
+            type: object
+            properties:
+              description:
+                type: string
+              method:
+                type: string
+      example:
+        message: "Welcome to the Push Decision API"
+        endpoints:
+          "/can-i-push-to-prod":
+            description: "Check if it's safe to push to production"
+            method: "GET"
+    ErrorResponse:
+      type: object
+      required:
+      - error
+      - message
+      properties:
+        error:
+          type: string
+          description: Error type
+          examples:
+          - "InternalServerError"
+        message:
+          type: string
+          description: Error message
+          examples:
+          - "An unexpected error occurred"
+        timestamp:
+          type: string
+          format: date-time
+          description: When the error occurred
+      example:
+        error: "InternalServerError"
+        message: "An unexpected error occurred"
+        timestamp: "2024-01-15T10:30:00Z"
